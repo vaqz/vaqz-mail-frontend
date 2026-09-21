@@ -1,0 +1,2635 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Vaqz Mobiz Mail</title>
+    <meta name="description" content="Vaqz Mobiz temporary mailbox">
+
+    <!-- VM Favicon -->
+    <link
+        rel="icon"
+        type="image/svg+xml"
+        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232563eb'/%3E%3Ctext x='32' y='40' text-anchor='middle' font-family='Arial,sans-serif' font-size='25' font-weight='800' fill='white'%3EVM%3C/text%3E%3C/svg%3E"
+    >
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    :root {
+        --blue: #2563eb;
+        --blue-dark: #1d4ed8;
+        --blue-light: #eff6ff;
+        --text: #111827;
+        --muted: #6b7280;
+        --border: #e5e7eb;
+        --background: #f5f7fb;
+        --white: #ffffff;
+        --danger: #dc2626;
+        --success: #16a34a;
+    }
+
+    html {
+        scroll-behavior: smooth;
+    }
+
+    body {
+        margin: 0;
+        background: var(--background);
+        color: var(--text);
+        font-family:
+            Inter,
+            -apple-system,
+            BlinkMacSystemFont,
+            "Segoe UI",
+            Roboto,
+            Helvetica,
+            Arial,
+            sans-serif;
+    }
+
+    button,
+    input {
+        font: inherit;
+    }
+
+    button {
+        cursor: pointer;
+    }
+
+    /* =========================
+       HEADER
+    ========================= */
+
+    .topbar {
+        height: 68px;
+        background: var(--white);
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+    }
+
+    .topbar-inner {
+        width: 100%;
+        max-width: 1100px;
+        margin: auto;
+        padding: 0 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .brand {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+    }
+
+    .brand-icon {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        background: var(--blue);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+        box-shadow: 0 4px 10px rgba(37, 99, 235, 0.18);
+    }
+
+    .brand-name {
+        font-size: 17px;
+        font-weight: 750;
+        letter-spacing: -0.3px;
+    }
+
+    .brand-name span {
+        color: var(--blue);
+    }
+
+    .brand-label {
+        color: var(--muted);
+        font-size: 13px;
+        margin-left: 2px;
+    }
+
+    /* =========================
+       MAIN
+    ========================= */
+
+    .container {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 38px 24px 45px;
+    }
+
+    /* =========================
+       OPEN MAILBOX
+    ========================= */
+
+    .welcome {
+        max-width: 720px;
+        margin: 30px auto 0;
+        text-align: center;
+    }
+
+    .welcome h1 {
+        margin: 0;
+        font-size: 32px;
+        line-height: 1.2;
+        letter-spacing: -1px;
+    }
+
+    .welcome p {
+        margin: 11px 0 0;
+        color: var(--muted);
+        font-size: 15px;
+        line-height: 1.6;
+    }
+
+    .open-card {
+        margin-top: 28px;
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 22px;
+        box-shadow: 0 8px 25px rgba(15, 23, 42, 0.04);
+    }
+
+    .input-row {
+        display: flex;
+        gap: 10px;
+    }
+
+    .mail-input {
+        flex: 1;
+        min-width: 0;
+        height: 48px;
+        border: 1px solid #d1d5db;
+        border-radius: 10px;
+        padding: 0 14px;
+        color: var(--text);
+        background: white;
+        outline: none;
+        transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .mail-input:focus {
+        border-color: var(--blue);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.10);
+    }
+
+    .primary-btn {
+        height: 48px;
+        padding: 0 20px;
+        border: 0;
+        border-radius: 10px;
+        background: var(--blue);
+        color: white;
+        font-weight: 650;
+        transition: background 0.15s, transform 0.1s;
+        white-space: nowrap;
+    }
+
+    .primary-btn:hover {
+        background: var(--blue-dark);
+    }
+
+    .primary-btn:active {
+        transform: translateY(1px);
+    }
+
+    .hint {
+        margin: 11px 2px 0;
+        text-align: left;
+        color: var(--muted);
+        font-size: 12px;
+    }
+
+    /* =========================
+       MAILBOX
+    ========================= */
+
+    .mailbox {
+        display: none;
+    }
+
+    .mailbox-header {
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 18px 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        box-shadow: 0 8px 25px rgba(15, 23, 42, 0.04);
+    }
+
+    .mailbox-info {
+        min-width: 0;
+    }
+
+    .mailbox-label {
+        color: var(--muted);
+        font-size: 12px;
+        margin-bottom: 5px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 650;
+    }
+
+    .mailbox-address {
+        font-size: 17px;
+        font-weight: 700;
+        word-break: break-all;
+    }
+
+    .mailbox-actions {
+        display: flex;
+        gap: 8px;
+        flex-shrink: 0;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+    }
+
+    .secondary-btn {
+        height: 40px;
+        padding: 0 13px;
+        border: 1px solid var(--border);
+        background: white;
+        color: #374151;
+        border-radius: 9px;
+        font-size: 13px;
+        font-weight: 600;
+        transition: background 0.15s, border-color 0.15s;
+        white-space: nowrap;
+    }
+
+    .secondary-btn:hover {
+        background: #f9fafb;
+        border-color: #d1d5db;
+    }
+
+    .danger-btn {
+        color: var(--danger);
+    }
+
+    /* =========================
+       STATUS
+    ========================= */
+
+    .status-row {
+        min-height: 42px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 4px;
+        color: var(--muted);
+        font-size: 13px;
+    }
+
+    .status {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+    }
+
+    .status-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--success);
+    }
+
+    .status-dot.loading {
+        background: var(--blue);
+        animation: pulse 1s infinite;
+    }
+
+    .status-dot.error {
+        background: var(--danger);
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            opacity: 1;
+        }
+
+        50% {
+            opacity: 0.35;
+        }
+    }
+
+    /* =========================
+       INBOX
+    ========================= */
+
+    .inbox-card {
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 8px 25px rgba(15, 23, 42, 0.04);
+    }
+
+    .inbox-title {
+        padding: 16px 20px;
+        border-bottom: 1px solid var(--border);
+        font-size: 13px;
+        font-weight: 700;
+        color: #374151;
+    }
+
+    .email-list {
+        min-height: 120px;
+    }
+
+    .email-item {
+        position: relative;
+        padding: 17px 14px 17px 28px;
+        border-bottom: 1px solid #f0f1f3;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        cursor: pointer;
+        transition: background 0.12s;
+    }
+
+    .email-item:last-child {
+        border-bottom: 0;
+    }
+
+    .email-item:hover {
+        background: #f9fbff;
+    }
+
+    .email-item.unread {
+        background: #f8fbff;
+    }
+
+    .email-item.unread:hover {
+        background: #f2f7ff;
+    }
+
+    .email-item.unread::before {
+        content: "";
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--blue);
+    }
+
+    .email-item.unread .email-from {
+        color: #374151;
+        font-weight: 650;
+    }
+
+    .email-item.unread .email-subject {
+        font-weight: 750;
+    }
+
+    .email-main {
+        min-width: 0;
+        flex: 1;
+    }
+
+    .email-from {
+        font-size: 13px;
+        color: var(--muted);
+        margin-bottom: 5px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .email-subject {
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--text);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .email-date {
+        color: var(--muted);
+        font-size: 12px;
+        white-space: nowrap;
+    }
+
+    /* =========================
+       DELETE MESSAGE BUTTON
+    ========================= */
+
+    .email-delete-btn {
+        width: 34px;
+        height: 34px;
+        flex-shrink: 0;
+        border: 1px solid transparent;
+        border-radius: 8px;
+        background: transparent;
+        color: #9ca3af;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        transition:
+            background 0.15s,
+            color 0.15s,
+            border-color 0.15s;
+    }
+
+    .email-delete-btn:hover {
+        background: #fef2f2;
+        color: var(--danger);
+        border-color: #fecaca;
+    }
+
+    .email-delete-btn:active {
+        transform: translateY(1px);
+    }
+
+    .email-delete-btn:focus-visible {
+        outline: 2px solid rgba(37, 99, 235, 0.25);
+        outline-offset: 2px;
+    }
+
+    /* =========================
+       EMPTY STATE
+    ========================= */
+
+    .empty {
+        padding: 48px 20px;
+        text-align: center;
+        color: var(--muted);
+    }
+
+    .empty-icon {
+        width: 48px;
+        height: 48px;
+        margin: 0 auto 13px;
+        border-radius: 14px;
+        background: var(--blue-light);
+        color: var(--blue);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 21px;
+    }
+
+    .empty-title {
+        color: #374151;
+        font-size: 15px;
+        font-weight: 650;
+    }
+
+    .empty-text {
+        margin-top: 5px;
+        font-size: 13px;
+    }
+
+    /* =========================
+       READER
+    ========================= */
+
+    .reader {
+        display: none;
+        margin-top: 18px;
+    }
+
+    .reader-card {
+        background: white;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 8px 25px rgba(15, 23, 42, 0.04);
+    }
+
+    .reader-toolbar {
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        background: #fafafa;
+    }
+
+    .back-btn {
+        border: 0;
+        background: transparent;
+        color: #374151;
+        font-size: 13px;
+        font-weight: 650;
+        padding: 7px 8px;
+        border-radius: 7px;
+    }
+
+    .back-btn:hover {
+        background: #f0f1f3;
+    }
+
+    .reader-date {
+        color: var(--muted);
+        font-size: 12px;
+    }
+
+    .reader-header {
+        padding: 25px 28px 20px;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .reader-subject {
+        margin: 0;
+        font-size: 22px;
+        line-height: 1.35;
+        letter-spacing: -0.4px;
+    }
+
+    .reader-meta {
+        margin-top: 13px;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.7;
+    }
+
+    .reader-meta strong {
+        color: #4b5563;
+    }
+
+    .reader-content {
+        padding: 0;
+        background: #f8fafc;
+    }
+
+    .email-frame {
+        display: block;
+        width: 100%;
+        height: 620px;
+        border: 0;
+        background: white;
+    }
+
+    .text-email {
+        padding: 28px;
+        background: white;
+        white-space: pre-wrap;
+        word-break: break-word;
+        font-family:
+            ui-monospace,
+            SFMono-Regular,
+            Menlo,
+            Monaco,
+            Consolas,
+            monospace;
+        font-size: 13px;
+        line-height: 1.7;
+        color: #374151;
+    }
+
+    /* =========================
+       FOOTER
+    ========================= */
+
+    .footer {
+        margin-top: 38px;
+        padding: 25px 15px 5px;
+        text-align: center;
+        color: #9ca3af;
+        font-size: 12px;
+    }
+
+    .footer-brand {
+        color: #4b5563;
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    .footer-brand span {
+        color: var(--blue);
+    }
+
+    .footer-description {
+        margin-top: 5px;
+        line-height: 1.5;
+    }
+
+    .footer-links {
+        margin-top: 13px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 13px;
+        flex-wrap: wrap;
+    }
+
+    .footer-links a {
+        color: #6b7280;
+        text-decoration: none;
+        font-weight: 600;
+        transition: color 0.15s;
+    }
+
+    .footer-links a:hover {
+        color: var(--blue);
+    }
+
+    .footer-separator {
+        color: #d1d5db;
+    }
+
+    .footer-copy {
+        margin-top: 14px;
+        font-size: 11px;
+        color: #9ca3af;
+    }
+
+    /* =========================
+       LOADING
+    ========================= */
+
+    .spinner {
+        display: inline-block;
+        width: 13px;
+        height: 13px;
+        border: 2px solid #dbeafe;
+        border-top-color: var(--blue);
+        border-radius: 50%;
+        animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    /* =========================
+       RESPONSIVE
+    ========================= */
+
+    @media (max-width: 700px) {
+
+        .topbar {
+            height: 62px;
+        }
+
+        .topbar-inner {
+            padding: 0 16px;
+        }
+
+        .brand-label {
+            display: none;
+        }
+
+        .container {
+            padding: 25px 14px 35px;
+        }
+
+        .welcome {
+            margin-top: 20px;
+        }
+
+        .welcome h1 {
+            font-size: 26px;
+        }
+
+        .welcome p {
+            font-size: 14px;
+        }
+
+        .open-card {
+            padding: 15px;
+            border-radius: 13px;
+        }
+
+        .input-row {
+            flex-direction: column;
+        }
+
+        .primary-btn {
+            width: 100%;
+        }
+
+        .mailbox-header {
+            padding: 15px;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 14px;
+        }
+
+        .mailbox-actions {
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .mailbox-actions button {
+            width: 100%;
+        }
+
+        .status-row {
+            padding: 0 2px;
+        }
+
+        .email-item {
+            padding: 15px 10px 15px 27px;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .email-date {
+            display: none;
+        }
+
+        .email-delete-btn {
+            width: 32px;
+            height: 32px;
+            font-size: 15px;
+        }
+
+        .reader-header {
+            padding: 20px 17px;
+        }
+
+        .reader-subject {
+            font-size: 19px;
+        }
+
+        .email-frame {
+            height: 560px;
+        }
+
+        .text-email {
+            padding: 20px 17px;
+        }
+
+        .footer {
+            margin-top: 30px;
+        }
+    }
+</style>
+
+</head>
+
+<body>
+
+<!-- HEADER -->
+<header class="topbar">
+
+    <div class="topbar-inner">
+
+        <div class="brand">
+
+            <div class="brand-icon">
+                VM
+            </div>
+
+            <div>
+
+                <div class="brand-name">
+                    Vaqz<span>Mobiz</span>
+                </div>
+
+                <div class="brand-label">
+                    Mailbox
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</header>
+
+
+<main class="container">
+
+    <!-- OPEN MAILBOX -->
+    <section id="openSection">
+
+        <div class="welcome">
+
+            <h1>
+                Open your mailbox
+            </h1>
+
+            <p>
+                Enter your Vaqz Mobiz email address to view received messages.
+            </p>
+
+        </div>
+
+
+        <div class="open-card">
+
+            <div class="input-row">
+
+                <input
+                    id="mailInput"
+                    class="mail-input"
+                    type="email"
+                    placeholder="example@vaqzmobiz.com"
+                    autocomplete="off"
+                    spellcheck="false"
+                >
+
+                <button
+                    id="openBtn"
+                    class="primary-btn"
+                >
+                    Open Mailbox
+                </button>
+
+            </div>
+
+            <div class="hint">
+                Only @vaqzmobiz.com mailboxes are supported.
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- MAILBOX -->
+    <section id="mailboxSection" class="mailbox">
+
+        <div class="mailbox-header">
+
+            <div class="mailbox-info">
+
+                <div class="mailbox-label">
+                    Current mailbox
+                </div>
+
+                <div
+                    id="mailboxAddress"
+                    class="mailbox-address"
+                ></div>
+
+            </div>
+
+
+            <div class="mailbox-actions">
+
+                <button
+                    id="changeBtn"
+                    class="secondary-btn"
+                >
+                    Change
+                </button>
+
+                <button
+                    id="copyBtn"
+                    class="secondary-btn"
+                    title="Copy email address"
+                >
+                    Copy
+                </button>
+
+                <button
+                    id="refreshBtn"
+                    class="secondary-btn"
+                >
+                    ↻ Refresh
+                </button>
+
+                <button
+                    id="clearBtn"
+                    class="secondary-btn danger-btn"
+                >
+                    Clear
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <div class="status-row">
+
+            <div class="status">
+
+                <span
+                    id="statusDot"
+                    class="status-dot"
+                ></span>
+
+                <span id="statusText">
+                    Ready
+                </span>
+
+            </div>
+
+
+            <div id="messageCount"></div>
+
+        </div>
+
+
+        <div class="inbox-card">
+
+            <div class="inbox-title">
+                Inbox
+            </div>
+
+            <div
+                id="emailList"
+                class="email-list"
+            ></div>
+
+        </div>
+
+    </section>
+
+
+    <!-- EMAIL READER -->
+    <section
+        id="readerSection"
+        class="reader"
+    >
+
+        <div class="reader-card">
+
+            <div class="reader-toolbar">
+
+                <button
+                    id="backBtn"
+                    class="back-btn"
+                >
+                    ← Back to Inbox
+                </button>
+
+                <div
+                    id="readerDate"
+                    class="reader-date"
+                ></div>
+
+            </div>
+
+
+            <div class="reader-header">
+
+                <h2
+                    id="readerSubject"
+                    class="reader-subject"
+                ></h2>
+
+                <div
+                    id="readerMeta"
+                    class="reader-meta"
+                ></div>
+
+            </div>
+
+
+            <div
+                id="readerContent"
+                class="reader-content"
+            ></div>
+
+        </div>
+
+    </section>
+
+
+    <!-- FOOTER -->
+    <footer class="footer">
+
+        <div class="footer-brand">
+            Vaqz<span>Mobiz</span> Mail
+        </div>
+
+        <div class="footer-description">
+            Simple, temporary mailbox service by Vaqz Mobiz.
+        </div>
+
+        <div class="footer-links">
+
+            <a
+                href="https://vaqzmobiz.com"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+                Website
+            </a>
+
+            <span class="footer-separator">•</span>
+
+            <a
+                href="https://fb.com/vaqzmobiz20"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+                Facebook
+            </a>
+
+            <span class="footer-separator">•</span>
+
+            <a
+                href="https://t.me/vaqzmobizhub"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+                Telegram
+            </a>
+
+        </div>
+
+        <div class="footer-copy">
+            © 2026 Vaqz Mobiz. All rights reserved.
+        </div>
+
+    </footer>
+
+</main>
+
+
+<script>
+
+const API =
+    "https://temp-mail.vaqzvasquez.workers.dev";
+
+const DOMAIN =
+    "vaqzmobiz.com";
+
+let currentMailbox = "";
+
+let currentEmails = [];
+
+let currentReaderEmailId = null;
+
+let deletingEmails = new Set();
+
+
+/* =========================
+   ELEMENTS
+========================= */
+
+const openSection =
+    document.getElementById(
+        "openSection"
+    );
+
+const mailboxSection =
+    document.getElementById(
+        "mailboxSection"
+    );
+
+const readerSection =
+    document.getElementById(
+        "readerSection"
+    );
+
+const mailInput =
+    document.getElementById(
+        "mailInput"
+    );
+
+const openBtn =
+    document.getElementById(
+        "openBtn"
+    );
+
+const changeBtn =
+    document.getElementById(
+        "changeBtn"
+    );
+
+const mailboxAddress =
+    document.getElementById(
+        "mailboxAddress"
+    );
+
+const refreshBtn =
+    document.getElementById(
+        "refreshBtn"
+    );
+
+const clearBtn =
+    document.getElementById(
+        "clearBtn"
+    );
+
+const copyBtn =
+    document.getElementById(
+        "copyBtn"
+    );
+
+const emailList =
+    document.getElementById(
+        "emailList"
+    );
+
+const statusText =
+    document.getElementById(
+        "statusText"
+    );
+
+const statusDot =
+    document.getElementById(
+        "statusDot"
+    );
+
+const messageCount =
+    document.getElementById(
+        "messageCount"
+    );
+
+const backBtn =
+    document.getElementById(
+        "backBtn"
+    );
+
+const readerSubject =
+    document.getElementById(
+        "readerSubject"
+    );
+
+const readerMeta =
+    document.getElementById(
+        "readerMeta"
+    );
+
+const readerDate =
+    document.getElementById(
+        "readerDate"
+    );
+
+const readerContent =
+    document.getElementById(
+        "readerContent"
+    );
+
+
+/* =========================
+   HELPERS
+========================= */
+
+function escapeHtml(value) {
+
+    if (
+        value === null ||
+        value === undefined
+    ) {
+        return "";
+    }
+
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
+}
+
+
+function setStatus(
+    text,
+    type = "normal"
+) {
+
+    statusText.textContent =
+        text;
+
+    statusDot.className =
+        "status-dot";
+
+    if (
+        type === "loading"
+    ) {
+
+        statusDot.classList.add(
+            "loading"
+        );
+
+    }
+
+    if (
+        type === "error"
+    ) {
+
+        statusDot.classList.add(
+            "error"
+        );
+
+    }
+
+}
+
+
+function formatDate(timestamp) {
+
+    if (!timestamp) {
+        return "";
+    }
+
+    const date =
+        new Date(
+            Number(timestamp) * 1000
+        );
+
+    if (
+        isNaN(
+            date.getTime()
+        )
+    ) {
+        return "";
+    }
+
+    return date.toLocaleString(
+        [],
+        {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+            hour: "numeric",
+            minute: "2-digit"
+        }
+    );
+
+}
+
+
+function normalizeEmail(value) {
+
+    return value
+        .trim()
+        .toLowerCase();
+
+}
+
+
+function isValidMailbox(value) {
+
+    const email =
+        normalizeEmail(value);
+
+    return (
+        email.endsWith(
+            "@" + DOMAIN
+        ) &&
+        email.length >
+            DOMAIN.length + 1 &&
+        !email.includes(" ")
+    );
+
+}
+
+
+/* =========================
+   READ / UNREAD STORAGE
+========================= */
+
+function readStorageKey() {
+
+    return (
+        "vaqz_read_" +
+        encodeURIComponent(
+            currentMailbox
+        )
+    );
+
+}
+
+
+function getReadIds() {
+
+    if (!currentMailbox) {
+        return [];
+    }
+
+    try {
+
+        const saved =
+            localStorage.getItem(
+                readStorageKey()
+            );
+
+        if (!saved) {
+            return [];
+        }
+
+        const parsed =
+            JSON.parse(saved);
+
+        return Array.isArray(
+            parsed
+        )
+            ? parsed
+            : [];
+
+    } catch (error) {
+
+        return [];
+
+    }
+
+}
+
+
+function saveReadIds(ids) {
+
+    if (!currentMailbox) {
+        return;
+    }
+
+    localStorage.setItem(
+        readStorageKey(),
+        JSON.stringify(ids)
+    );
+
+}
+
+
+function markAsRead(id) {
+
+    if (!id) {
+        return;
+    }
+
+    const ids =
+        getReadIds();
+
+    if (!ids.includes(id)) {
+
+        ids.push(id);
+
+        saveReadIds(ids);
+
+    }
+
+}
+
+
+function clearReadStatus() {
+
+    if (!currentMailbox) {
+        return;
+    }
+
+    localStorage.removeItem(
+        readStorageKey()
+    );
+
+}
+
+
+/* =========================
+   OPEN MAILBOX
+========================= */
+
+async function openMailbox() {
+
+    const email =
+        normalizeEmail(
+            mailInput.value
+        );
+
+    if (
+        !isValidMailbox(email)
+    ) {
+
+        setStatus(
+            "Enter a valid @" +
+            DOMAIN +
+            " address.",
+            "error"
+        );
+
+        mailInput.focus();
+
+        return;
+
+    }
+
+    currentMailbox =
+        email;
+
+    currentReaderEmailId =
+        null;
+
+    localStorage.setItem(
+        "vaqz_last_mailbox",
+        email
+    );
+
+    mailboxAddress.textContent =
+        email;
+
+    openSection.style.display =
+        "none";
+
+    mailboxSection.style.display =
+        "block";
+
+    readerSection.style.display =
+        "none";
+
+    await loadInbox();
+
+}
+
+
+/* =========================
+   LOAD INBOX
+========================= */
+
+async function loadInbox() {
+
+    if (!currentMailbox) {
+        return;
+    }
+
+    setStatus(
+        "Checking inbox...",
+        "loading"
+    );
+
+    try {
+
+        const encodedEmail =
+            encodeURIComponent(
+                currentMailbox
+            );
+
+        const response =
+            await fetch(
+                `${API}/emails/${encodedEmail}`,
+                {
+                    cache: "no-store"
+                }
+            );
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Unable to load mailbox."
+            );
+
+        }
+
+        const data =
+            await response.json();
+
+        if (!data.success) {
+
+            throw new Error(
+                data.error ||
+                "Unable to load mailbox."
+            );
+
+        }
+
+        currentEmails =
+            Array.isArray(
+                data.result
+            )
+                ? data.result
+                : [];
+
+        renderInbox();
+
+        setStatus(
+            "Mailbox updated"
+        );
+
+    } catch (error) {
+
+        console.error(error);
+
+        setStatus(
+            "Unable to load mailbox.",
+            "error"
+        );
+
+        emailList.innerHTML = `
+            <div class="empty">
+
+                <div class="empty-icon">
+                    !
+                </div>
+
+                <div class="empty-title">
+                    Something went wrong
+                </div>
+
+                <div class="empty-text">
+                    Please try refreshing the mailbox.
+                </div>
+
+            </div>
+        `;
+
+    }
+
+}
+
+
+/* =========================
+   RENDER INBOX
+========================= */
+
+function renderInbox() {
+
+    const readIds =
+        getReadIds();
+
+    const unreadCount =
+        currentEmails.filter(
+            email =>
+                !readIds.includes(
+                    email.id
+                )
+        ).length;
+
+
+    if (unreadCount > 0) {
+
+        messageCount.textContent =
+            `${currentEmails.length} ${
+                currentEmails.length === 1
+                    ? "message"
+                    : "messages"
+            } · ${unreadCount} unread`;
+
+    } else {
+
+        messageCount.textContent =
+            `${currentEmails.length} ${
+                currentEmails.length === 1
+                    ? "message"
+                    : "messages"
+            }`;
+
+    }
+
+
+    if (
+        currentEmails.length === 0
+    ) {
+
+        emailList.innerHTML = `
+            <div class="empty">
+
+                <div class="empty-icon">
+                    ✉
+                </div>
+
+                <div class="empty-title">
+                    Your inbox is empty
+                </div>
+
+                <div class="empty-text">
+                    New messages will appear here automatically.
+                </div>
+
+            </div>
+        `;
+
+        return;
+
+    }
+
+
+    emailList.innerHTML =
+        currentEmails
+            .map(
+                (
+                    email,
+                    index
+                ) => {
+
+                    const from =
+                        email.from_address ||
+                        "Unknown sender";
+
+                    const subject =
+                        email.subject ||
+                        "(No subject)";
+
+                    const unread =
+                        !readIds.includes(
+                            email.id
+                        );
+
+                    const deleting =
+                        deletingEmails.has(
+                            email.id
+                        );
+
+                    return `
+                        <div
+                            class="email-item ${
+                                unread
+                                    ? "unread"
+                                    : ""
+                            }"
+                            data-index="${index}"
+                        >
+
+                            <div class="email-main">
+
+                                <div class="email-from">
+                                    ${escapeHtml(from)}
+                                </div>
+
+                                <div class="email-subject">
+                                    ${escapeHtml(subject)}
+                                </div>
+
+                            </div>
+
+
+                            <div class="email-date">
+                                ${escapeHtml(
+                                    formatDate(
+                                        email.received_at
+                                    )
+                                )}
+                            </div>
+
+
+                            <button
+                                class="email-delete-btn"
+                                type="button"
+                                title="${
+                                    deleting
+                                        ? "Deleting..."
+                                        : "Delete message"
+                                }"
+                                aria-label="${
+                                    deleting
+                                        ? "Deleting message"
+                                        : "Delete message"
+                                }"
+                                data-delete-index="${index}"
+                                ${
+                                    deleting
+                                        ? "disabled"
+                                        : ""
+                                }
+                            >
+                                ${
+                                    deleting
+                                        ? "..."
+                                        : "🗑"
+                                }
+                            </button>
+
+                        </div>
+                    `;
+
+                }
+            )
+            .join("");
+
+
+    document
+        .querySelectorAll(
+            ".email-item"
+        )
+        .forEach(
+            item => {
+
+                item.addEventListener(
+                    "click",
+                    event => {
+
+                        if (
+                            event.target.closest(
+                                ".email-delete-btn"
+                            )
+                        ) {
+
+                            return;
+
+                        }
+
+                        const index =
+                            Number(
+                                item.dataset.index
+                            );
+
+                        openEmail(
+                            currentEmails[
+                                index
+                            ]
+                        );
+
+                    }
+                );
+
+            }
+        );
+
+
+    document
+        .querySelectorAll(
+            ".email-delete-btn"
+        )
+        .forEach(
+            button => {
+
+                button.addEventListener(
+                    "click",
+                    async event => {
+
+                        event.stopPropagation();
+
+                        const index =
+                            Number(
+                                button.dataset
+                                    .deleteIndex
+                            );
+
+                        const email =
+                            currentEmails[
+                                index
+                            ];
+
+                        if (
+                            !email ||
+                            !email.id ||
+                            deletingEmails.has(
+                                email.id
+                            )
+                        ) {
+
+                            return;
+
+                        }
+
+                        const subject =
+                            email.subject ||
+                            "(No subject)";
+
+                        const confirmed =
+                            confirm(
+                                `Delete this message?\n\n${subject}`
+                            );
+
+                        if (!confirmed) {
+                            return;
+                        }
+
+                        await deleteEmail(
+                            email.id
+                        );
+
+                    }
+                );
+
+            }
+        );
+
+}
+
+
+/* =========================
+   OPEN EMAIL
+========================= */
+
+async function openEmail(
+    email
+) {
+
+    if (
+        !email ||
+        !email.id
+    ) {
+
+        return;
+
+    }
+
+
+    currentReaderEmailId =
+        email.id;
+
+
+    markAsRead(
+        email.id
+    );
+
+    renderInbox();
+
+
+    readerSection.style.display =
+        "block";
+
+
+    readerSubject.textContent =
+        email.subject ||
+        "(No subject)";
+
+
+    readerMeta.innerHTML = `
+        <strong>From:</strong>
+        ${escapeHtml(
+            email.from_address ||
+            "Unknown"
+        )}
+
+        <br>
+
+        <strong>To:</strong>
+        ${escapeHtml(
+            email.to_address ||
+            currentMailbox
+        )}
+    `;
+
+
+    readerDate.textContent =
+        formatDate(
+            email.received_at
+        );
+
+
+    readerContent.innerHTML = `
+        <div class="empty">
+
+            <span class="spinner"></span>
+
+            <div
+                style="margin-top:10px;"
+            >
+                Loading message...
+            </div>
+
+        </div>
+    `;
+
+
+    readerSection.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+    });
+
+
+    try {
+
+        const response =
+            await fetch(
+                `${API}/inbox/${encodeURIComponent(
+                    email.id
+                )}`,
+                {
+                    cache: "no-store"
+                }
+            );
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Unable to load message."
+            );
+
+        }
+
+
+        const data =
+            await response.json();
+
+
+        if (
+            !data.success ||
+            !data.result
+        ) {
+
+            throw new Error(
+                "Message content unavailable."
+            );
+
+        }
+
+
+        /*
+         * Only render if the user is still
+         * viewing this same message.
+         */
+        if (
+            currentReaderEmailId !==
+            email.id
+        ) {
+
+            return;
+
+        }
+
+
+        renderEmailContent(
+            data.result
+        );
+
+    } catch (error) {
+
+        console.error(error);
+
+        if (
+            currentReaderEmailId !==
+            email.id
+        ) {
+
+            return;
+
+        }
+
+        readerContent.innerHTML = `
+            <div class="empty">
+
+                <div class="empty-icon">
+                    !
+                </div>
+
+                <div class="empty-title">
+                    Message could not be loaded
+                </div>
+
+                <div class="empty-text">
+                    Please go back and try again.
+                </div>
+
+            </div>
+        `;
+
+    }
+
+}
+
+
+/* =========================
+   PROFESSIONAL EMAIL VIEW
+========================= */
+
+function renderEmailContent(
+    email
+) {
+
+    if (
+        email.html_content
+    ) {
+
+        const frame =
+            document.createElement(
+                "iframe"
+            );
+
+        frame.className =
+            "email-frame";
+
+        frame.setAttribute(
+            "sandbox",
+            "allow-popups allow-popups-to-escape-sandbox"
+        );
+
+        frame.srcdoc = `
+            <!DOCTYPE html>
+
+            <html>
+
+            <head>
+
+                <meta
+                    name="viewport"
+                    content="width=device-width, initial-scale=1.0"
+                >
+
+                <style>
+
+                    * {
+                        box-sizing: border-box;
+                    }
+
+                    html,
+                    body {
+                        margin: 0;
+                        padding: 0;
+                        background: #ffffff;
+                    }
+
+                    body {
+                        padding: 28px;
+                        color: #1f2937;
+                        font-family:
+                            Arial,
+                            Helvetica,
+                            sans-serif;
+                        font-size: 15px;
+                        line-height: 1.6;
+                        overflow-x: hidden;
+                        word-wrap: break-word;
+                    }
+
+                    img {
+                        max-width: 100% !important;
+                        height: auto !important;
+                    }
+
+                    table {
+                        max-width: 100% !important;
+                    }
+
+                    td,
+                    th {
+                        max-width: 100%;
+                    }
+
+                    a {
+                        color: #2563eb;
+                    }
+
+                    p {
+                        margin-top: 0.7em;
+                        margin-bottom: 0.7em;
+                    }
+
+                    pre {
+                        white-space: pre-wrap;
+                        word-break: break-word;
+                    }
+
+                </style>
+
+            </head>
+
+            <body>
+
+                ${email.html_content}
+
+            </body>
+
+            </html>
+        `;
+
+
+        readerContent.innerHTML =
+            "";
+
+        readerContent.appendChild(
+            frame
+        );
+
+        return;
+
+    }
+
+
+    if (
+        email.text_content
+    ) {
+
+        readerContent.innerHTML = `
+            <div class="text-email"></div>
+        `;
+
+        readerContent
+            .querySelector(
+                ".text-email"
+            )
+            .textContent =
+                email.text_content;
+
+        return;
+
+    }
+
+
+    if (
+        email.raw_body
+    ) {
+
+        readerContent.innerHTML = `
+            <div class="text-email"></div>
+        `;
+
+        readerContent
+            .querySelector(
+                ".text-email"
+            )
+            .textContent =
+                email.raw_body;
+
+        return;
+
+    }
+
+
+    readerContent.innerHTML = `
+        <div class="empty">
+
+            <div class="empty-icon">
+                ✉
+            </div>
+
+            <div class="empty-title">
+                No message content available
+            </div>
+
+        </div>
+    `;
+
+}
+
+
+/* =========================
+   COPY ADDRESS
+========================= */
+
+async function copyMailbox() {
+
+    if (!currentMailbox) {
+        return;
+    }
+
+    try {
+
+        await navigator.clipboard
+            .writeText(
+                currentMailbox
+            );
+
+        const original =
+            copyBtn.textContent;
+
+        copyBtn.textContent =
+            "Copied!";
+
+        setTimeout(
+            () => {
+
+                copyBtn.textContent =
+                    original;
+
+            },
+            1500
+        );
+
+    } catch (error) {
+
+        console.error(
+            error
+        );
+
+    }
+
+}
+
+
+/* =========================
+   DELETE SINGLE EMAIL
+========================= */
+
+async function deleteEmail(
+    emailId
+) {
+
+    if (
+        !emailId ||
+        deletingEmails.has(
+            emailId
+        )
+    ) {
+        return false;
+    }
+
+
+    deletingEmails.add(
+        emailId
+    );
+
+    renderInbox();
+
+
+    setStatus(
+        "Deleting message...",
+        "loading"
+    );
+
+
+    try {
+
+        const response =
+            await fetch(
+                `${API}/inbox/${encodeURIComponent(
+                    emailId
+                )}`,
+                {
+                    method: "DELETE"
+                }
+            );
+
+
+        let data = null;
+
+        try {
+            data =
+                await response.json();
+        } catch (error) {
+            data = null;
+        }
+
+
+        if (
+            !response.ok ||
+            !data?.success
+        ) {
+
+            throw new Error(
+                data?.error?.message ||
+                "Unable to delete message."
+            );
+
+        }
+
+
+        currentEmails =
+            currentEmails.filter(
+                email =>
+                    email.id !==
+                    emailId
+            );
+
+
+        const readIds =
+            getReadIds();
+
+
+        saveReadIds(
+            readIds.filter(
+                id =>
+                    id !== emailId
+            )
+        );
+
+
+        /*
+         * Only close the reader when
+         * the deleted message is the
+         * message currently being viewed.
+         */
+        if (
+            currentReaderEmailId ===
+            emailId
+        ) {
+
+            currentReaderEmailId =
+                null;
+
+            readerSection.style.display =
+                "none";
+
+            readerContent.innerHTML =
+                "";
+
+        }
+
+
+        renderInbox();
+
+
+        setStatus(
+            "Message deleted"
+        );
+
+
+        return true;
+
+    } catch (error) {
+
+        console.error(
+            error
+        );
+
+        setStatus(
+            "Unable to delete message.",
+            "error"
+        );
+
+        return false;
+
+    } finally {
+
+        deletingEmails.delete(
+            emailId
+        );
+
+        renderInbox();
+
+    }
+
+}
+
+
+/* =========================
+   CLEAR VISIBLE INBOX
+========================= */
+
+async function clearMailbox() {
+
+    if (
+        !currentMailbox ||
+        currentEmails.length === 0
+    ) {
+
+        setStatus(
+            "Inbox is already empty"
+        );
+
+        return;
+
+    }
+
+
+    const count =
+        currentEmails.length;
+
+    const confirmed =
+        confirm(
+            `Delete all ${count} ${
+                count === 1
+                    ? "message"
+                    : "messages"
+            } currently shown in this inbox?`
+        );
+
+
+    if (!confirmed) {
+        return;
+    }
+
+
+    /*
+     * The backend intentionally does NOT
+     * allow mailbox-wide DELETE.
+     *
+     * Instead, delete each currently
+     * visible public message individually.
+     */
+    const emailIds =
+        currentEmails
+            .map(
+                email =>
+                    email.id
+            )
+            .filter(Boolean);
+
+
+    setStatus(
+        "Clearing inbox...",
+        "loading"
+    );
+
+
+    let deletedCount = 0;
+
+
+    for (
+        const emailId of emailIds
+    ) {
+
+        const deleted =
+            await deleteEmail(
+                emailId
+            );
+
+        if (deleted) {
+            deletedCount++;
+        }
+
+    }
+
+
+    if (
+        currentEmails.length === 0
+    ) {
+
+        clearReadStatus();
+
+        currentReaderEmailId =
+            null;
+
+        readerSection.style.display =
+            "none";
+
+        setStatus(
+            "Inbox cleared"
+        );
+
+        return;
+
+    }
+
+
+    if (
+        deletedCount > 0
+    ) {
+
+        setStatus(
+            `${deletedCount} ${
+                deletedCount === 1
+                    ? "message"
+                    : "messages"
+            } deleted`
+        );
+
+    } else {
+
+        setStatus(
+            "Unable to clear inbox.",
+            "error"
+        );
+
+    }
+
+}
+
+
+/* =========================
+   CHANGE MAILBOX
+========================= */
+
+function changeMailbox() {
+
+    readerSection.style.display =
+        "none";
+
+    mailboxSection.style.display =
+        "none";
+
+    openSection.style.display =
+        "block";
+
+    mailInput.value =
+        "";
+
+    currentMailbox =
+        "";
+
+    currentEmails =
+        [];
+
+    currentReaderEmailId =
+        null;
+
+    deletingEmails.clear();
+
+    mailInput.focus();
+
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+    });
+
+}
+
+
+/* =========================
+   BACK TO INBOX
+========================= */
+
+function backToInbox() {
+
+    readerSection.style.display =
+        "none";
+
+    currentReaderEmailId =
+        null;
+
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+    });
+
+}
+
+
+/* =========================
+   EVENTS
+========================= */
+
+openBtn.addEventListener(
+    "click",
+    openMailbox
+);
+
+
+mailInput.addEventListener(
+    "keydown",
+    event => {
+
+        if (
+            event.key === "Enter"
+        ) {
+
+            openMailbox();
+
+        }
+
+    }
+);
+
+
+changeBtn.addEventListener(
+    "click",
+    changeMailbox
+);
+
+
+refreshBtn.addEventListener(
+    "click",
+    loadInbox
+);
+
+
+clearBtn.addEventListener(
+    "click",
+    clearMailbox
+);
+
+
+copyBtn.addEventListener(
+    "click",
+    copyMailbox
+);
+
+
+backBtn.addEventListener(
+    "click",
+    backToInbox
+);
+
+
+/* =========================
+   SAVED MAILBOX
+========================= */
+
+window.addEventListener(
+    "load",
+    () => {
+
+        const saved =
+            localStorage.getItem(
+                "vaqz_last_mailbox"
+            );
+
+
+        if (
+            saved &&
+            isValidMailbox(saved)
+        ) {
+
+            mailInput.value =
+                saved;
+
+        }
+
+    }
+);
+
+
+/* =========================
+   AUTO REFRESH
+========================= */
+
+setInterval(
+    () => {
+
+        if (
+            currentMailbox &&
+            mailboxSection.style.display !==
+                "none" &&
+            readerSection.style.display ===
+                "none"
+        ) {
+
+            loadInbox();
+
+        }
+
+    },
+    10000
+);
+
+</script>
+
+</body>
+
+</html>
