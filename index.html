@@ -1093,8 +1093,10 @@
 const API =
     "https://api.vaqzmobiz.com";
 
-const DOMAIN =
-    "vaqzmobiz.com";
+const DOMAINS = [
+    "vaqzmobiz.com",
+    "vmhub.top"
+];
 
 let currentMailbox = "";
 
@@ -1320,11 +1322,14 @@ function isValidMailbox(value) {
         normalizeEmail(value);
 
     return (
-        email.endsWith(
-            "@" + DOMAIN
+        DOMAINS.some(
+            domain =>
+                email.endsWith(
+                    "@" + domain
+                )
         ) &&
         email.length >
-            DOMAIN.length + 1 &&
+            1 &&
         !email.includes(" ")
     );
 
