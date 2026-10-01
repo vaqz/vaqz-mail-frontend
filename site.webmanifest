@@ -1,0 +1,17 @@
+{
+  "name": "Vaqz Mobiz Mail",
+  "short_name": "Vaqz Mobiz Mail",
+  "description": "Vaqz Mobiz temporary mailbox service.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f6f8fc",
+  "theme_color": "#2563eb",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "64x64",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
