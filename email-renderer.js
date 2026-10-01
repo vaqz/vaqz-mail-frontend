@@ -1,4 +1,28 @@
 (function(){
+  const modalStyle=document.createElement("style");
+  modalStyle.textContent=`
+    .reader{position:fixed;inset:0;z-index:100;margin:0;padding:clamp(10px,3vw,32px);background:rgba(15,23,42,.42);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);overflow:auto;overscroll-behavior:contain}
+    .reader-card{width:min(100%,980px);height:min(92vh,900px);margin:auto;display:flex;flex-direction:column;background:#fff;border:1px solid rgba(255,255,255,.7);border-radius:20px;overflow:hidden;box-shadow:0 28px 80px rgba(15,23,42,.22);animation:readerIn .18s ease-out}
+    .reader-toolbar,.reader-header{flex:0 0 auto}
+    .reader-content{flex:1 1 auto;min-height:0;overflow:auto;-webkit-overflow-scrolling:touch}
+    .reader-content .email-frame{height:100%;min-height:100%;display:block}
+    .reader-content .text-email{min-height:100%;overflow:auto}
+    @keyframes readerIn{from{opacity:0;transform:translateY(8px) scale(.992)}to{opacity:1;transform:translateY(0) scale(1)}}
+    @media(max-width:700px){.reader{padding:8px}.reader-card{width:100%;height:calc(100vh - 16px);height:calc(100dvh - 16px);border-radius:16px}.reader-toolbar{padding:9px 10px}.reader-header{padding:18px 15px 16px}.reader-content{overflow:auto}}
+  `;
+  document.head.appendChild(modalStyle);
+
+  const readerSection=document.getElementById("readerSection");
+  if(readerSection){
+    const syncReaderScrollLock=function(){
+      const open=readerSection.style.display!=="none";
+      document.documentElement.style.overflow=open?"hidden":"";
+      document.body.style.overflow=open?"hidden":"";
+    };
+    new MutationObserver(syncReaderScrollLock).observe(readerSection,{attributes:true,attributeFilter:["style"]});
+    syncReaderScrollLock();
+  }
+
   function sanitizeEmailDocument(html){
     const doc=new DOMParser().parseFromString(String(html||""),"text/html");
     doc.querySelectorAll("script,noscript,iframe,object,embed,form,input,button,base,meta[http-equiv],link[rel=import]").forEach(function(el){el.remove()});
