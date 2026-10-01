@@ -61,6 +61,11 @@
         cursor: pointer;
     }
 
+    button:disabled {
+        cursor: not-allowed;
+        opacity: 0.65;
+    }
+
     /* =========================
        HEADER
     ========================= */
@@ -131,7 +136,7 @@
     }
 
     /* =========================
-       OPEN MAILBOX
+       LOGIN
     ========================= */
 
     .welcome {
@@ -163,14 +168,14 @@
         box-shadow: 0 8px 25px rgba(15, 23, 42, 0.04);
     }
 
-    .input-row {
+    .input-stack {
         display: flex;
+        flex-direction: column;
         gap: 10px;
     }
 
     .mail-input {
-        flex: 1;
-        min-width: 0;
+        width: 100%;
         height: 48px;
         border: 1px solid #d1d5db;
         border-radius: 10px;
@@ -187,6 +192,7 @@
     }
 
     .primary-btn {
+        width: 100%;
         height: 48px;
         padding: 0 20px;
         border: 0;
@@ -206,11 +212,28 @@
         transform: translateY(1px);
     }
 
+    .primary-btn.loading {
+        pointer-events: none;
+    }
+
     .hint {
         margin: 11px 2px 0;
         text-align: left;
         color: var(--muted);
         font-size: 12px;
+    }
+
+    .login-error {
+        display: none;
+        margin-top: 12px;
+        padding: 10px 12px;
+        border-radius: 9px;
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        color: #b91c1c;
+        font-size: 13px;
+        line-height: 1.45;
+        text-align: left;
     }
 
     /* =========================
@@ -716,14 +739,6 @@
             border-radius: 13px;
         }
 
-        .input-row {
-            flex-direction: column;
-        }
-
-        .primary-btn {
-            width: 100%;
-        }
-
         .mailbox-header {
             padding: 15px;
             flex-direction: column;
@@ -819,17 +834,17 @@
 
 <main class="container">
 
-    <!-- OPEN MAILBOX -->
+    <!-- LOGIN -->
     <section id="openSection">
 
         <div class="welcome">
 
             <h1>
-                Open your mailbox
+                Sign in to your mailbox
             </h1>
 
             <p>
-                Enter your Vaqz Mobiz email address to view received messages.
+                Enter your Vaqz Mobiz email address and password to view received messages.
             </p>
 
         </div>
@@ -837,28 +852,41 @@
 
         <div class="open-card">
 
-            <div class="input-row">
+            <div class="input-stack">
 
                 <input
                     id="mailInput"
                     class="mail-input"
                     type="email"
                     placeholder="example@vaqzmobiz.com"
-                    autocomplete="off"
+                    autocomplete="username"
                     spellcheck="false"
+                >
+
+                <input
+                    id="passwordInput"
+                    class="mail-input"
+                    type="password"
+                    placeholder="Password"
+                    autocomplete="current-password"
                 >
 
                 <button
                     id="openBtn"
                     class="primary-btn"
                 >
-                    Open Mailbox
+                    Sign In
                 </button>
 
             </div>
 
+            <div
+                id="loginError"
+                class="login-error"
+            ></div>
+
             <div class="hint">
-                Only @vaqzmobiz.com mailboxes are supported.
+                Use the email and password assigned to your Vaqz Mobiz mailbox.
             </div>
 
         </div>
@@ -888,10 +916,10 @@
             <div class="mailbox-actions">
 
                 <button
-                    id="changeBtn"
-                    class="secondary-btn"
+                    id="logoutBtn"
+                    class="secondary-btn danger-btn"
                 >
-                    Change
+                    Logout
                 </button>
 
                 <button
@@ -1063,7 +1091,7 @@
 <script>
 
 const API =
-    "https://temp-mail.vaqzvasquez.workers.dev";
+    "https://api.vaqzmobiz.com";
 
 const DOMAIN =
     "vaqzmobiz.com";
@@ -1101,14 +1129,19 @@ const mailInput =
         "mailInput"
     );
 
+const passwordInput =
+    document.getElementById(
+        "passwordInput"
+    );
+
 const openBtn =
     document.getElementById(
         "openBtn"
     );
 
-const changeBtn =
+const logoutBtn =
     document.getElementById(
-        "changeBtn"
+        "logoutBtn"
     );
 
 const mailboxAddress =
@@ -1174,6 +1207,11 @@ const readerDate =
 const readerContent =
     document.getElementById(
         "readerContent"
+    );
+
+const loginError =
+    document.getElementById(
+        "loginError"
     );
 
 
@@ -1293,6 +1331,517 @@ function isValidMailbox(value) {
 }
 
 
+function showLoginError(message) {
+
+    loginError.textContent =
+        message;
+
+    loginError.style.display =
+        "block";
+
+}
+
+
+function hideLoginError() {
+
+    loginError.textContent =
+        "";
+
+    loginError.style.display =
+        "none";
+
+}
+
+
+function resetMailboxState() {
+
+    readerSection.style.display =
+        "none";
+
+    mailboxSection.style.display =
+        "none";
+
+    openSection.style.display =
+        "block";
+
+    currentMailbox =
+        "";
+
+    currentEmails =
+        [];
+
+    currentReaderEmailId =
+        null;
+
+    deletingEmails.clear();
+
+    mailboxAddress.textContent =
+        "";
+
+    emailList.innerHTML =
+        "";
+
+    messageCount.textContent =
+        "";
+
+    readerContent.innerHTML =
+        "";
+
+}
+
+
+/* =========================
+   AUTHENTICATION
+========================= */
+
+async function checkSession() {
+
+    try {
+
+        const response =
+            await fetch(
+                `${API}/auth/me`,
+                {
+                    method: "GET",
+                    credentials: "include",
+                    cache: "no-store"
+                }
+            );
+
+        if (!response.ok) {
+
+            resetMailboxState();
+
+            return false;
+
+        }
+
+
+        const data =
+            await response.json();
+
+
+        if (
+            !data.authenticated ||
+            !data.email
+        ) {
+
+            resetMailboxState();
+
+            return false;
+
+        }
+
+
+        const email =
+            normalizeEmail(
+                data.email
+            );
+
+
+        if (
+            !isValidMailbox(email)
+        ) {
+
+            resetMailboxState();
+
+            return false;
+
+        }
+
+
+        currentMailbox =
+            email;
+
+        mailboxAddress.textContent =
+            email;
+
+        localStorage.setItem(
+            "vaqz_last_mailbox",
+            email
+        );
+
+        openSection.style.display =
+            "none";
+
+        mailboxSection.style.display =
+            "block";
+
+        readerSection.style.display =
+            "none";
+
+        return true;
+
+    } catch (error) {
+
+        console.error(
+            "Session check failed:",
+            error
+        );
+
+        resetMailboxState();
+
+        return false;
+
+    }
+
+}
+
+
+/* =========================
+   LOGIN
+========================= */
+
+async function loginMailbox() {
+
+    hideLoginError();
+
+
+    const email =
+        normalizeEmail(
+            mailInput.value
+        );
+
+    const password =
+        passwordInput.value;
+
+
+    if (
+        !isValidMailbox(email)
+    ) {
+
+        showLoginError(
+            "Enter a valid @" +
+            DOMAIN +
+            " email address."
+        );
+
+        mailInput.focus();
+
+        return;
+
+    }
+
+
+    if (!password) {
+
+        showLoginError(
+            "Enter your mailbox password."
+        );
+
+        passwordInput.focus();
+
+        return;
+
+    }
+
+
+    const originalText =
+        openBtn.textContent;
+
+
+    openBtn.disabled =
+        true;
+
+    openBtn.classList.add(
+        "loading"
+    );
+
+    openBtn.innerHTML =
+        `
+            <span
+                class="spinner"
+                style="
+                    border-color:#bfdbfe;
+                    border-top-color:white;
+                    vertical-align:-2px;
+                    margin-right:7px;
+                "
+            ></span>
+            Signing In...
+        `;
+
+
+    try {
+
+        const response =
+            await fetch(
+                `${API}/auth/login`,
+                {
+                    method: "POST",
+                    credentials: "include",
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+                    body: JSON.stringify({
+                        email,
+                        password
+                    })
+                }
+            );
+
+
+        let data = null;
+
+        try {
+
+            data =
+                await response.json();
+
+        } catch (error) {
+
+            data = null;
+
+        }
+
+
+        if (
+            !response.ok ||
+            !data?.success
+        ) {
+
+            const message =
+                data?.error ||
+                "Invalid email or password.";
+
+            throw new Error(
+                typeof message === "string"
+                    ? message
+                    : "Invalid email or password."
+            );
+
+        }
+
+
+        const authenticatedEmail =
+            normalizeEmail(
+                data.email || email
+            );
+
+
+        if (
+            !isValidMailbox(
+                authenticatedEmail
+            )
+        ) {
+
+            throw new Error(
+                "Invalid mailbox account returned by the server."
+            );
+
+        }
+
+
+        currentMailbox =
+            authenticatedEmail;
+
+        currentReaderEmailId =
+            null;
+
+        currentEmails =
+            [];
+
+        deletingEmails.clear();
+
+
+        localStorage.setItem(
+            "vaqz_last_mailbox",
+            authenticatedEmail
+        );
+
+
+        mailboxAddress.textContent =
+            authenticatedEmail;
+
+
+        /*
+         * Password is deliberately
+         * NOT stored anywhere.
+         */
+        passwordInput.value =
+            "";
+
+
+        openSection.style.display =
+            "none";
+
+        mailboxSection.style.display =
+            "block";
+
+        readerSection.style.display =
+            "none";
+
+
+        await loadInbox();
+
+
+    } catch (error) {
+
+        console.error(
+            "Login failed:",
+            error
+        );
+
+
+        showLoginError(
+            error.message ||
+            "Unable to sign in. Please try again."
+        );
+
+
+    } finally {
+
+        openBtn.disabled =
+            false;
+
+        openBtn.classList.remove(
+            "loading"
+        );
+
+        openBtn.textContent =
+            originalText;
+
+    }
+
+}
+
+
+/* =========================
+   LOGOUT
+========================= */
+
+async function logoutMailbox() {
+
+    const confirmed =
+        confirm(
+            "Are you sure you want to log out?"
+        );
+
+    if (!confirmed) {
+        return;
+    }
+
+
+    logoutBtn.disabled =
+        true;
+
+    const originalText =
+        logoutBtn.textContent;
+
+    logoutBtn.textContent =
+        "Logging out...";
+
+
+    try {
+
+        await fetch(
+            `${API}/auth/logout`,
+            {
+                method: "POST",
+                credentials: "include",
+                cache: "no-store"
+            }
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Logout request failed:",
+            error
+        );
+
+    } finally {
+
+        /*
+         * Reset the local UI even if
+         * the network request failed.
+         */
+        const previousMailbox =
+            currentMailbox;
+
+        if (previousMailbox) {
+
+            localStorage.removeItem(
+                "vaqz_read_" +
+                encodeURIComponent(
+                    previousMailbox
+                )
+            );
+
+        }
+
+        resetMailboxState();
+
+        hideLoginError();
+
+        mailInput.value =
+            localStorage.getItem(
+                "vaqz_last_mailbox"
+            ) || "";
+
+        passwordInput.value =
+            "";
+
+        logoutBtn.disabled =
+            false;
+
+        logoutBtn.textContent =
+            originalText;
+
+        mailInput.focus();
+
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+
+    }
+
+}
+
+
+/* =========================
+   SESSION EXPIRED
+========================= */
+
+function handleSessionExpired() {
+
+    const previousMailbox =
+        currentMailbox;
+
+    if (previousMailbox) {
+
+        localStorage.removeItem(
+            "vaqz_read_" +
+            encodeURIComponent(
+                previousMailbox
+            )
+        );
+
+    }
+
+    resetMailboxState();
+
+    hideLoginError();
+
+    passwordInput.value =
+        "";
+
+    showLoginError(
+        "Your session has expired. Please sign in again."
+    );
+
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+    });
+
+    mailInput.focus();
+
+}
+
+
 /* =========================
    READ / UNREAD STORAGE
 ========================= */
@@ -1392,62 +1941,6 @@ function clearReadStatus() {
 
 
 /* =========================
-   OPEN MAILBOX
-========================= */
-
-async function openMailbox() {
-
-    const email =
-        normalizeEmail(
-            mailInput.value
-        );
-
-    if (
-        !isValidMailbox(email)
-    ) {
-
-        setStatus(
-            "Enter a valid @" +
-            DOMAIN +
-            " address.",
-            "error"
-        );
-
-        mailInput.focus();
-
-        return;
-
-    }
-
-    currentMailbox =
-        email;
-
-    currentReaderEmailId =
-        null;
-
-    localStorage.setItem(
-        "vaqz_last_mailbox",
-        email
-    );
-
-    mailboxAddress.textContent =
-        email;
-
-    openSection.style.display =
-        "none";
-
-    mailboxSection.style.display =
-        "block";
-
-    readerSection.style.display =
-        "none";
-
-    await loadInbox();
-
-}
-
-
-/* =========================
    LOAD INBOX
 ========================= */
 
@@ -1473,9 +1966,37 @@ async function loadInbox() {
             await fetch(
                 `${API}/emails/${encodedEmail}`,
                 {
+                    method: "GET",
+                    credentials: "include",
                     cache: "no-store"
                 }
             );
+
+
+        if (
+            response.status === 401
+        ) {
+
+            handleSessionExpired();
+
+            return;
+
+        }
+
+
+        if (
+            response.status === 403
+        ) {
+
+            setStatus(
+                "Access denied.",
+                "error"
+            );
+
+            return;
+
+        }
+
 
         if (!response.ok) {
 
@@ -1485,8 +2006,10 @@ async function loadInbox() {
 
         }
 
+
         const data =
             await response.json();
+
 
         if (!data.success) {
 
@@ -1497,6 +2020,7 @@ async function loadInbox() {
 
         }
 
+
         currentEmails =
             Array.isArray(
                 data.result
@@ -1504,11 +2028,14 @@ async function loadInbox() {
                 ? data.result
                 : [];
 
+
         renderInbox();
+
 
         setStatus(
             "Mailbox updated"
         );
+
 
     } catch (error) {
 
@@ -1892,9 +2419,34 @@ async function openEmail(
                     email.id
                 )}`,
                 {
+                    method: "GET",
+                    credentials: "include",
                     cache: "no-store"
                 }
             );
+
+
+        if (
+            response.status === 401
+        ) {
+
+            handleSessionExpired();
+
+            return;
+
+        }
+
+
+        if (
+            response.status === 403
+        ) {
+
+            throw new Error(
+                "You do not have access to this message."
+            );
+
+        }
+
 
         if (!response.ok) {
 
@@ -1938,6 +2490,7 @@ async function openEmail(
         renderEmailContent(
             data.result
         );
+
 
     } catch (error) {
 
@@ -2232,18 +2785,34 @@ async function deleteEmail(
                     emailId
                 )}`,
                 {
-                    method: "DELETE"
+                    method: "DELETE",
+                    credentials: "include"
                 }
             );
+
+
+        if (
+            response.status === 401
+        ) {
+
+            handleSessionExpired();
+
+            return false;
+
+        }
 
 
         let data = null;
 
         try {
+
             data =
                 await response.json();
+
         } catch (error) {
+
             data = null;
+
         }
 
 
@@ -2312,6 +2881,7 @@ async function deleteEmail(
 
         return true;
 
+
     } catch (error) {
 
         console.error(
@@ -2324,6 +2894,7 @@ async function deleteEmail(
         );
 
         return false;
+
 
     } finally {
 
@@ -2463,45 +3034,6 @@ async function clearMailbox() {
 
 
 /* =========================
-   CHANGE MAILBOX
-========================= */
-
-function changeMailbox() {
-
-    readerSection.style.display =
-        "none";
-
-    mailboxSection.style.display =
-        "none";
-
-    openSection.style.display =
-        "block";
-
-    mailInput.value =
-        "";
-
-    currentMailbox =
-        "";
-
-    currentEmails =
-        [];
-
-    currentReaderEmailId =
-        null;
-
-    deletingEmails.clear();
-
-    mailInput.focus();
-
-    window.scrollTo({
-        top: 0,
-        behavior: "smooth"
-    });
-
-}
-
-
-/* =========================
    BACK TO INBOX
 ========================= */
 
@@ -2527,7 +3059,7 @@ function backToInbox() {
 
 openBtn.addEventListener(
     "click",
-    openMailbox
+    loginMailbox
 );
 
 
@@ -2539,7 +3071,7 @@ mailInput.addEventListener(
             event.key === "Enter"
         ) {
 
-            openMailbox();
+            passwordInput.focus();
 
         }
 
@@ -2547,9 +3079,25 @@ mailInput.addEventListener(
 );
 
 
-changeBtn.addEventListener(
+passwordInput.addEventListener(
+    "keydown",
+    event => {
+
+        if (
+            event.key === "Enter"
+        ) {
+
+            loginMailbox();
+
+        }
+
+    }
+);
+
+
+logoutBtn.addEventListener(
     "click",
-    changeMailbox
+    logoutMailbox
 );
 
 
@@ -2578,13 +3126,20 @@ backBtn.addEventListener(
 
 
 /* =========================
-   SAVED MAILBOX
+   INITIAL PAGE LOAD
 ========================= */
 
 window.addEventListener(
     "load",
-    () => {
+    async () => {
 
+        /*
+         * Restore only the email address
+         * for convenience.
+         *
+         * We NEVER automatically open
+         * the mailbox based on this value.
+         */
         const saved =
             localStorage.getItem(
                 "vaqz_last_mailbox"
@@ -2598,6 +3153,24 @@ window.addEventListener(
 
             mailInput.value =
                 saved;
+
+        }
+
+
+        /*
+         * The server session is authoritative.
+         */
+        const authenticated =
+            await checkSession();
+
+
+        if (authenticated) {
+
+            await loadInbox();
+
+        } else {
+
+            mailInput.focus();
 
         }
 
@@ -2630,6 +3203,9 @@ setInterval(
 
 </script>
 
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"885212e91242411ea5c3ddc4e5b57668","r":1,"spa":2}' crossorigin="anonymous"></script>
+
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"885212e91242411ea5c3ddc4e5b57668","r":1,"spa":2}' crossorigin="anonymous"></script>
 </body>
 
 </html>
