@@ -1,0 +1,67 @@
+name: Enable vmhub.top mailbox domain
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  patch-domain:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Add vmhub.top to frontend mailbox validation
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('index.html')
+          text = path.read_text(encoding='utf-8')
+
+          old = "const ALLOWED_DOMAIN =\n    '@vaqzmobiz.com';"
+          new = "const ALLOWED_DOMAINS = [\n    '@vaqzmobiz.com',\n    '@vmhub.top'\n];"
+
+          if old not in text:
+              raise SystemExit('Expected ALLOWED_DOMAIN declaration was not found; no changes made.')
+
+          text = text.replace(old, new, 1)
+
+          old_fn = '''function isValidMailbox(value) {\n\n    const email =\n        normalizeEmail(value);\n\n    return (\n        email.endsWith(\n            \"@\" + DOMAIN\n        ) &&\n        email.length >\n            DOMAIN.length + 1 &&\n        !email.includes(\" \" )\n    );\n\n}'''.replace('" " )', '" ")')
+
+          if old_fn not in text:
+              # Match the exact function from the current frontend without relying on formatting outside it.
+              start = text.find('function isValidMailbox(value) {')
+              if start == -1:
+                  raise SystemExit('Expected isValidMailbox function was not found; no changes made.')
+              end = text.find('\n\n}\n', start)
+              if end == -1:
+                  raise SystemExit('Could not safely locate end of isValidMailbox; no changes made.')
+              end += len('\n\n}\n')
+              old_fn = text[start:end]
+
+          new_fn = '''function isValidMailbox(value) {\n\n    const email =\n        normalizeEmail(value);\n\n    return (\n        ALLOWED_DOMAINS.some(\n            domain =>\n                email.endsWith(domain)\n        ) &&\n        !email.includes(\" \" )\n    );\n\n}'''.replace('" " )', '" ")')
+
+          text = text.replace(old_fn, new_fn, 1)
+          path.write_text(text, encoding='utf-8')
+          PY
+
+      - name: Commit frontend change
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git diff --cached --quiet && exit 0
+          git commit -m "Allow vmhub.top mailbox login"
+          git push
+
+      - name: Remove temporary workflow
+        if: success()
+        run: |
+          git rm .github/workflows/enable-vmhub-domain.yml
+          git commit -m "Remove temporary domain patch workflow"
+          git push
